@@ -11,7 +11,7 @@ import {
 	Chip,
 } from "@mui/material";
 import { Visibility, Edit, Block } from "@mui/icons-material";
-import type { User } from "../types/user";
+import type { User } from "../../types/user";
 
 // 2. Định nghĩa type cho props
 interface UserTableProps {

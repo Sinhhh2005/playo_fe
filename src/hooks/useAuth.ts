@@ -1,10 +1,10 @@
-import { useAppSelector } from ".";
+// import { useAppSelector } from "./index";
 
-export function useAuth() {
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+// export function useAuth() {
+//   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  return {
-    isAuthenticated: isAuthenticated || localStorage.getItem("me"),
-    user,
-  };
-}
+//   return {
+//     isAuthenticated: isAuthenticated || localStorage.getItem("me"),
+//     user,
+//   };
+// }

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("User");
+  const [_userName, setUserName] = useState("User");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

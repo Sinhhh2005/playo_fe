@@ -10,7 +10,7 @@ import {
 	Paper,
 	Chip,
 } from "@mui/material";
-import type { FieldRequest } from "../types/field";
+import type { FieldRequest } from "../../types/field"
 
 interface FieldManagementProps {
 	requests: FieldRequest[];

@@ -1,5 +1,3 @@
-import React from "react";
-
 const DownloadFloating = () => {
   return (
     <div className="fixed bottom-6 right-6 bg-gray-100 text-gray-900 rounded-lg shadow-md z-50 p-2 flex items-center gap-2">

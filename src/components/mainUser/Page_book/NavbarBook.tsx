@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 const NavbarBook = () => {
 	const navigate = useNavigate();
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [userName, setUserName] = useState("User");
+	const [_userName, setUserName] = useState("User");
 	const [open, setOpen] = useState(false);
 
 	const [openPlaces, setOpenPlaces] = useState(false);
