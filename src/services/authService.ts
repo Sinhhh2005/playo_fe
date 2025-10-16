@@ -1,30 +1,44 @@
-import axios from "axios";
+// src/services/authService.ts
+const API_URL = import.meta.env.VITE_API_URL;
 
-const API_URL = "http://localhost:5000/api/auth";
+// 🟢 Hàm login
+export const login = async (credentials: { email: string; password: string }) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
 
-export const register = async (data: {
-  name: string;
-  email: string;
-  password: string;
-}): Promise<{ message: string }> => {
-  const res = await axios.post(`${API_URL}/register`, data);
-  return res.data;
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Đăng nhập thất bại");
+    }
+
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
 };
 
-export const login = async (data: {
-  email: string;
-  password: string;
-}): Promise<{ accessToken: string; refreshToken: string }> => {
-  const res = await axios.post(`${API_URL}/login`, data);
-  return res.data;
-};
+// 🟢 Hàm register (thêm mới)
+export const register = async (userData: { name: string; email: string; password: string }) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
 
-export const refreshToken = async (token: string): Promise<{ accessToken: string }> => {
-  const res = await axios.post(`${API_URL}/refresh-token`, { token });
-  return res.data;
-};
+    const data = await response.json();
 
-export const logout = async (userId: string): Promise<{ message: string }> => {
-  const res = await axios.post(`${API_URL}/logout`, { userId });
-  return res.data;
+    if (!response.ok) {
+      throw new Error(data.message || "Đăng ký thất bại");
+    }
+
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
 };

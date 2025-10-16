@@ -2,32 +2,51 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaRunning, FaBaseballBall, FaChalkboardTeacher, FaUserCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";
 
-const Navbar = () => {
+interface User {
+  name: string;
+  email: string;
+  role: string;
+}
+
+const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [_userName, setUserName] = useState("User");
-  const [open, setOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("User");
+  const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    const role = localStorage.getItem("role");
-    if (token && role) {
-      setIsLoggedIn(true);
-      setUserName(localStorage.getItem("userName") || "User");
-    }
+    const loadUser = () => {
+      const token = localStorage.getItem("accessToken");
+      const userName = localStorage.getItem("userName");
+
+      if (token && userName) {
+        setIsLoggedIn(true);
+        setUserName(userName);
+      } else {
+        setIsLoggedIn(false);
+        setUserName("User");
+      }
+    };
+
+    loadUser();
+
+    // Lắng nghe thay đổi localStorage (khi login/logout ở các component khác)
+    window.addEventListener("storage", loadUser);
+
+    return () => window.removeEventListener("storage", loadUser);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("role");
-    localStorage.removeItem("userName");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
     setOpen(false);
     navigate("/login");
   };
 
-  // 🔹 Đóng dropdown khi click ra ngoài
+  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -78,16 +97,19 @@ const Navbar = () => {
                 className="flex items-center text-gray-700 hover:text-green-600"
               >
                 <FaUserCircle size={28} />
+                <span className="ml-2 font-medium">{userName}</span>
               </button>
 
               {open && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md">
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-md">
                   <Link
                     to="/profile"
+                    onClick={() => setOpen(false)}
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg"
                   >
                     My Profile
                   </Link>
+
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-b-lg"

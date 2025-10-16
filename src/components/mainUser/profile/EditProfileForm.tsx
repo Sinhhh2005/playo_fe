@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const EditProfileForm = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -8,45 +11,101 @@ const EditProfileForm = () => {
     email: "",
   });
 
-  // 🔹 Lấy dữ liệu user đã đăng ký từ localStorage
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        phone: user.phone || "",
-        email: user.email || "",
-      });
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("accessToken");
+      const storedEmail = localStorage.getItem("email");
+      const storedName = localStorage.getItem("userName");
+
+      // Nếu chưa có token → lấy dữ liệu từ localStorage
+      if (!token) {
+        setFormData({
+          firstName: storedName || "",
+          lastName: "",
+          phone: "",
+          email: storedEmail || "",
+        });
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`${API_URL}/api/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data && res.data.user) {
+          const user = res.data.user;
+          setFormData({
+            firstName: user.firstName || user.name || "",
+            lastName: user.lastName || "",
+            phone: user.phone || "",
+            email: user.email || storedEmail || "",
+          });
+        } else {
+          // fallback localStorage nếu BE chưa có dữ liệu
+          setFormData({
+            firstName: storedName || "",
+            lastName: "",
+            phone: "",
+            email: storedEmail || "",
+          });
+        }
+      } catch (err) {
+        console.error("❌ Lỗi lấy thông tin user:", err);
+        setFormData({
+          firstName: storedName || "",
+          lastName: "",
+          phone: "",
+          email: storedEmail || "",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [API_URL]);
+
+  // 🔹 Khi nhập liệu
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // 🔹 Reset lại form về dữ liệu gốc
   const handleReset = () => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        phone: user.phone || "",
-        email: user.email || "",
+    window.location.reload(); // reset nhanh nhất, load lại từ BE/localStorage
+  };
+
+  // 🔹 Lưu lại thông tin (gửi lên BE hoặc lưu localStorage)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      localStorage.setItem("user", JSON.stringify(formData));
+      alert("✅ Profile updated locally!");
+      return;
+    }
+
+    try {
+      const res = await axios.put(`${API_URL}/users/me`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.data) {
+        localStorage.setItem("user", JSON.stringify(res.data));
+        alert("✅ Profile updated successfully!");
+      }
+    } catch (err) {
+      console.error("❌ Lỗi cập nhật user:", err);
+      alert("⚠️ Cập nhật thất bại!");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Saved:", formData);
-
-    // 🔹 Update lại user trong localStorage
-    localStorage.setItem("user", JSON.stringify(formData));
-    alert("Profile updated successfully!");
-  };
+  if (loading) return <p className="text-center py-6">Loading profile...</p>;
 
   return (
     <form
