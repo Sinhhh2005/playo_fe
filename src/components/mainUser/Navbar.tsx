@@ -2,12 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaRunning, FaBaseballBall, FaChalkboardTeacher, FaUserCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";
 
-interface User {
-  name: string;
-  email: string;
-  role: string;
-}
-
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
