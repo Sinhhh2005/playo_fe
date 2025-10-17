@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("User");
   const [role, setRole] = useState("");
-  const [userId, setUserId] = useState("");
+  const [_userId, setUserId] = useState("");
   const [open, setOpen] = useState(false);
 
   // 🟢 Load thông tin user từ localStorage
