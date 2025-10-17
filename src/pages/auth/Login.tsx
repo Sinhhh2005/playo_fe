@@ -9,13 +9,12 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // 🔹 Nếu đã login, điều hướng ngay
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const role = localStorage.getItem("role");
-
     if (token) {
-      if (role === "admin") navigate("/admin");
-      else navigate("/");
+      navigate(role === "admin" ? "/admin" : "/");
     }
   }, [navigate]);
 
@@ -31,19 +30,25 @@ const Login = () => {
     try {
       setLoading(true);
       const response = await login({ email, password });
+      console.log("✅ Login response:", response);
 
-      if (response.success && response.data) {
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-        localStorage.setItem("role", response.data.role);
-        localStorage.setItem("userName", response.data.userName);
-        localStorage.setItem("email", response.data.email); 
+      if (response.success && response.user) {
+        const user = response.user;
 
-        if (response.data.role === "admin") navigate("/admin");
+        // 🔹 Gửi event để Navbar cập nhật ngay
+        window.dispatchEvent(new Event("userChanged"));
+
+        console.log(`Welcome ${user.name || user.fullName} (${user.role})`);
+
+        // ✅ Điều hướng theo role
+        if (user.role === "admin") navigate("/admin");
         else navigate("/");
       } else {
         setError(response.message || "Đăng nhập thất bại");
       }
+    } catch (error: any) {
+      console.error("❌ Login error:", error);
+      setError(error.message || "Lỗi khi đăng nhập");
     } finally {
       setLoading(false);
     }
@@ -52,7 +57,9 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Login
+        </h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input

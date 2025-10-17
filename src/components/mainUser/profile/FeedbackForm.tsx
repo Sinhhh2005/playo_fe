@@ -1,18 +1,30 @@
 import { useState } from "react";
+import { sendFeedback } from "../../../services/feedbackService";
 
 const FeedbackForm = () => {
   const [feedback, setFeedback] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Feedback submitted: " + feedback);
-    setFeedback("");
+    if (!feedback.trim()) {
+      setMessage("Vui lòng nhập nội dung feedback.");
+      return;
+    }
+
+    setLoading(true);
+    const result = await sendFeedback(feedback);
+    setLoading(false);
+
+    setMessage(result.message);
+    if (result.success) setFeedback("");
   };
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-4">
-        Please tell us what do you think, any kind of feedback is highly appreciated. 🫶
+        Please tell us what you think. Any kind of feedback is highly appreciated 🫶
       </h2>
 
       <form onSubmit={handleSubmit}>
@@ -28,11 +40,16 @@ const FeedbackForm = () => {
 
         <button
           type="submit"
-          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition"
+          disabled={loading}
+          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition disabled:opacity-50"
         >
-          Submit
+          {loading ? "Sending..." : "Submit"}
         </button>
       </form>
+
+      {message && (
+        <p className="text-center text-sm mt-4 text-gray-700">{message}</p>
+      )}
     </div>
   );
 };

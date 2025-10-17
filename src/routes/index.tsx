@@ -63,7 +63,7 @@ const router = createBrowserRouter([
 
 	// Protected routes (user + admin)
 	{
-		element: <PrivateRoute roles={["user", "admin"]} />,
+		element: <PrivateRoute roles={["user", "admin", "owner"]} />,
 		children: [
 			{
 				path: "/profile",
@@ -71,14 +71,13 @@ const router = createBrowserRouter([
 			},
 		],
 	},
-
+	ownerRoutes,
 	{
 		element: <PrivateRoute roles={["admin"]} />,
 		children: [
 			adminRoutes,
 		],
 	},
-	ownerRoutes,
 
 	// 404 fallback
 	{

@@ -5,6 +5,7 @@ import { register } from "../../services/authService";
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState(""); // 🆕 thêm phone
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,14 +15,14 @@ const Register = () => {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !password) {
+    if (!name || !email || !phone || !password) {
       setError("Vui lòng nhập đầy đủ thông tin");
       return;
     }
 
     try {
       setLoading(true);
-      const response = await register({ name, email, password });
+      const response = await register({ name, email, phone, password });
 
       if (response.success) {
         alert("Đăng ký thành công! Hãy đăng nhập.");
@@ -37,7 +38,9 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Register
+        </h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input
@@ -53,6 +56,13 @@ const Register = () => {
             className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="tel"
+            placeholder="Phone Number"
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
           />
           <input
             type="password"

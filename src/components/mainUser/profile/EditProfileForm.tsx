@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { getUserById, updateUser } from "../../../services/userService";
 
 const EditProfileForm = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -15,93 +13,79 @@ const EditProfileForm = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem("accessToken");
-      const storedEmail = localStorage.getItem("email");
-      const storedName = localStorage.getItem("userName");
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const storedEmail = localStorage.getItem("email") || "";
 
-      // Nếu chưa có token → lấy dữ liệu từ localStorage
-      if (!token) {
+      if (!storedUser?.id) {
+        console.warn("⚠️ Không tìm thấy user trong localStorage");
         setFormData({
-          firstName: storedName || "",
+          firstName: "",
           lastName: "",
           phone: "",
-          email: storedEmail || "",
+          email: storedEmail,
         });
         setLoading(false);
         return;
       }
 
-      try {
-        const res = await axios.get(`${API_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.data && res.data.user) {
-          const user = res.data.user;
-          setFormData({
-            firstName: user.firstName || user.name || "",
-            lastName: user.lastName || "",
-            phone: user.phone || "",
-            email: user.email || storedEmail || "",
-          });
-        } else {
-          // fallback localStorage nếu BE chưa có dữ liệu
-          setFormData({
-            firstName: storedName || "",
-            lastName: "",
-            phone: "",
-            email: storedEmail || "",
-          });
-        }
-      } catch (err) {
-        console.error("❌ Lỗi lấy thông tin user:", err);
+      // 🟢 Gọi service lấy user theo ID
+      const res = await getUserById(storedUser.id);
+      if (res.success && res.data) {
+        const user = res.data;
+        const nameParts = user.name ? user.name.split(" ") : ["", ""];
         setFormData({
-          firstName: storedName || "",
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          phone: user.phone || "",
+          email: user.email || storedEmail,
+        });
+      } else {
+        console.error("❌ Lỗi lấy thông tin user:", res.message);
+        setFormData({
+          firstName: "",
           lastName: "",
           phone: "",
-          email: storedEmail || "",
+          email: storedEmail,
         });
-      } finally {
-        setLoading(false);
       }
+
+      setLoading(false);
     };
 
     fetchProfile();
-  }, [API_URL]);
+  }, []);
 
-  // 🔹 Khi nhập liệu
+  // 🟡 Handle change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 🔹 Reset lại form về dữ liệu gốc
+  // 🔁 Reset form
   const handleReset = () => {
-    window.location.reload(); // reset nhanh nhất, load lại từ BE/localStorage
+    window.location.reload();
   };
 
-  // 🔹 Lưu lại thông tin (gửi lên BE hoặc lưu localStorage)
+  // 🟢 Submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      localStorage.setItem("user", JSON.stringify(formData));
-      alert("✅ Profile updated locally!");
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!storedUser?.id) {
+      alert("⚠️ Không tìm thấy user!");
       return;
     }
 
-    try {
-      const res = await axios.put(`${API_URL}/users/me`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const updatedData = {
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      phone: formData.phone,
+    };
 
-      if (res.data) {
-        localStorage.setItem("user", JSON.stringify(res.data));
-        alert("✅ Profile updated successfully!");
-      }
-    } catch (err) {
-      console.error("❌ Lỗi cập nhật user:", err);
-      alert("⚠️ Cập nhật thất bại!");
+    const res = await updateUser(storedUser.id, updatedData);
+
+    if (res.success) {
+      alert("✅ Cập nhật hồ sơ thành công!");
+    } else {
+      alert(`⚠️ Lỗi: ${res.message}`);
     }
   };
 
@@ -123,14 +107,14 @@ const EditProfileForm = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Name <span className="text-red-500">*</span>
+            First Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             name="firstName"
             value={formData.firstName}
             onChange={handleChange}
-            placeholder="Name"
+            placeholder="First Name"
             className="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-500"
           />
         </div>

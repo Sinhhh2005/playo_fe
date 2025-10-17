@@ -6,34 +6,47 @@ interface Booking {
   id: number;
   venue?: { name: string };
   sport?: { name: string };
-  slot?: { startTime: string; endTime: string };
+  startTime: string;
+  endTime: string;
   bookingDate: string;
-  status: string;
+  status: "pending" | "confirmed" | "cancelled";
   totalPrice: number;
 }
+
+const ITEMS_PER_PAGE = 5;
 
 const BookingsTabs = () => {
   const [activeTab, setActiveTab] = useState<"all" | "cancelled">("all");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchBookings = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setError("Bạn chưa đăng nhập");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const token = localStorage.getItem("accessToken");
-
-        const res = await axios.get(`${API_URL}/api/bookings/me`, {
+        const res = await axios.get(`${API_URL}/bookings/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         setBookings(res.data.bookings || []);
       } catch (err: any) {
         console.error("❌ Lỗi lấy danh sách booking:", err);
-        setError("Không thể tải danh sách booking");
+        if (err.response?.status === 401) {
+          setError("Token không hợp lệ hoặc hết hạn, vui lòng đăng nhập lại");
+        } else {
+          setError("Không thể tải danh sách booking");
+        }
       } finally {
         setLoading(false);
       }
@@ -46,6 +59,16 @@ const BookingsTabs = () => {
     activeTab === "cancelled"
       ? bookings.filter((b) => b.status === "cancelled")
       : bookings;
+
+  const totalPages = Math.ceil(filteredBookings.length / ITEMS_PER_PAGE);
+  const paginatedBookings = filteredBookings.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   if (loading)
     return (
@@ -66,7 +89,10 @@ const BookingsTabs = () => {
       {/* Tabs */}
       <div className="flex space-x-2 mb-6">
         <button
-          onClick={() => setActiveTab("all")}
+          onClick={() => {
+            setActiveTab("all");
+            setCurrentPage(1);
+          }}
           className={`px-6 py-2 rounded-lg font-medium ${
             activeTab === "all"
               ? "bg-green-600 text-white"
@@ -76,7 +102,10 @@ const BookingsTabs = () => {
           All Bookings
         </button>
         <button
-          onClick={() => setActiveTab("cancelled")}
+          onClick={() => {
+            setActiveTab("cancelled");
+            setCurrentPage(1);
+          }}
           className={`px-6 py-2 rounded-lg font-medium ${
             activeTab === "cancelled"
               ? "bg-green-600 text-white"
@@ -88,23 +117,18 @@ const BookingsTabs = () => {
       </div>
 
       {/* Content */}
-      {filteredBookings.length === 0 ? (
+      {paginatedBookings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 border rounded-lg">
-          {activeTab === "all" ? (
-            <>
-              <FaInfoCircle className="text-gray-500 text-xl mb-2" />
-              <p className="text-gray-600 text-sm">
-                The <span className="font-semibold">Reschedule</span> feature is
-                only available on iOS and Android app
-              </p>
-            </>
-          ) : (
-            <p className="text-gray-600 text-sm">No cancelled bookings</p>
-          )}
+          <FaInfoCircle className="text-gray-500 text-xl mb-2" />
+          <p className="text-gray-600 text-sm">
+            {activeTab === "all"
+              ? "Hiện chưa có booking nào"
+              : "Không có booking đã bị hủy"}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredBookings.map((b) => (
+          {paginatedBookings.map((b) => (
             <div
               key={b.id}
               className="border rounded-lg p-4 hover:shadow-sm transition"
@@ -125,21 +149,46 @@ const BookingsTabs = () => {
               </div>
               <p className="text-gray-600 text-sm mt-1">
                 {b.sport?.name || "Unknown sport"} • {b.bookingDate} •{" "}
-                {b.slot
-                  ? `${b.slot.startTime.slice(0, 5)} - ${b.slot.endTime.slice(0, 5)}`
-                  : "No time"}{" "}
-                • {b.totalPrice ? `${b.totalPrice}₫` : ""}
+                {b.startTime.slice(0, 5)} - {b.endTime.slice(0, 5)} •{" "}
+                {b.totalPrice.toLocaleString()}₫
               </p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Pagination (optional) */}
-      <div className="flex justify-center mt-6 space-x-2">
-        <button className="px-3 py-1 border rounded hover:bg-gray-100">‹</button>
-        <button className="px-3 py-1 border rounded hover:bg-gray-100">›</button>
-      </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+          >
+            ‹
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1 border rounded ${
+                page === currentPage
+                  ? "bg-green-600 text-white"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   );
 };
