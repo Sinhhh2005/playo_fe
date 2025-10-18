@@ -70,15 +70,19 @@ export interface Slot {
   field?: Field;
 }
 
-// Booking
-export interface Booking {
-  id: string;
+export type Booking = {
+  id: string; 
   userId: string;
   slotId: string;
-  status: "pending" | "confirmed" | "cancelled";
-  user?: User;
-  slot?: Slot;
-}
+  venueId: string;
+  venueName: string; // từ backend map sẵn
+  sportName: string; // từ backend map sẵn
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  price: number;
+};
+
 
 // Payment
 export interface Payment {

@@ -1,5 +1,3 @@
-// src/types/field.ts
-
 export interface Venue {
   _id: string;
   name: string;
@@ -8,21 +6,24 @@ export interface Venue {
   phone?: string;
 }
 
+export type FieldStatus = "OPEN" | "BOOKED" | "LIMITED" | "CLOSED";
+
 export interface Field {
   _id: string;
   name: string;
-  type: string;
+  type: string; // Ví dụ: "Badminton", "Football"
   price: number;
-  pricePerHour?: string | number;
+  pricePerHour?: number | string;
   image?: string;
-  status: "OPEN" | "BOOKED" | "LIMITED" | "CLOSED";
+  status: FieldStatus;
   description?: string;
   contactName?: string;
   contactPhone?: string;
-  address?: string;       // 👈 thêm dòng này
+  address?: string; // 👈 thêm dòng này để hiển thị địa chỉ sân
   createdAt: string;
   updatedAt?: string;
-
   availableDays?: string[];
-}
 
+  // Nếu bạn muốn liên kết field -> venue:
+  venue?: Venue;
+}

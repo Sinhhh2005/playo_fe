@@ -1,37 +1,69 @@
-// src/pages/user/GamesList.tsx
 import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaCalendarAlt, FaFilter, FaMoneyBill } from "react-icons/fa";
 import { GiTennisBall } from "react-icons/gi";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { getAllFields } from "../../../services/fieldService";
-import type { Field } from "../../../types/field";
+import * as Services from "../../../services"; // fieldService
+
+const GAMES_PER_PAGE = 6;
 
 const GamesList: React.FC = () => {
-  const [fields, setFields] = useState<Field[]>([]);
+  const [games, setGames] = useState<any[]>([]);
+  const [visibleCount, setVisibleCount] = useState(GAMES_PER_PAGE);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchFields = async () => {
+    const fetchGames = async () => {
       try {
-        const data = await getAllFields();
-        setFields(data);
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách sân:", error);
+        setLoading(true);
+        const data = await Services.FieldService.getAllFields();
+
+        // Map dữ liệu backend về FE structure
+        const mapped = data.map((g: any) => ({
+          id: g.id,
+          type: g.sportName || `Sport ${g.sportId}`,
+          host: {
+            name: g.contactName || "Unknown",
+            avatar: "", // hoặc URL placeholder nếu muốn
+            karma: 0,
+          },
+          date: g.date || "TBD",
+          time: g.time || "TBD",
+          venue: g.name,
+          distance: g.district,
+          slots: g.stock,
+          price: g.pricePerHour,
+          status: g.status === "active" ? "OPEN" : "CLOSED",
+          level: "Beginner",
+          going: { current: 0, total: g.stock || 0 },
+        }));
+
+        setGames(mapped);
+      } catch (err: any) {
+        console.error("Lỗi khi fetch games:", err);
+        setError(err?.message || "Không thể tải games");
       } finally {
         setLoading(false);
       }
     };
-    fetchFields();
+
+    fetchGames();
   }, []);
 
-  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + GAMES_PER_PAGE);
+  };
+
+  if (loading) return <div className="p-6 text-center">Đang tải...</div>;
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+  if (!games.length) return <div className="p-6 text-center text-gray-500">Chưa có game nào</div>;
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-8">
       {/* Title + Download App */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Games</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Games in Bangalore</h1>
         <div className="flex items-center mt-4 md:mt-0">
           <span className="text-sm mr-2">To create a game, download Playo app</span>
           <img
@@ -53,22 +85,18 @@ const GamesList: React.FC = () => {
           <MdOutlineAccessTime className="text-yellow-500" />
           <span className="text-sm">GameTime by Playo</span>
         </button>
-
         <button className="flex items-center space-x-2 px-4 py-2 border rounded-full bg-white shadow-sm hover:bg-gray-50">
           <FaFilter />
           <span className="text-sm">Filter & Sort By</span>
         </button>
-
         <button className="flex items-center space-x-2 px-4 py-2 border rounded-full bg-white shadow-sm hover:bg-gray-50">
           <GiTennisBall />
           <span className="text-sm">Sports</span>
         </button>
-
         <button className="flex items-center space-x-2 px-4 py-2 border rounded-full bg-white shadow-sm hover:bg-gray-50">
           <FaCalendarAlt />
           <span className="text-sm">Date</span>
         </button>
-
         <button className="flex items-center space-x-2 px-4 py-2 border rounded-full bg-white shadow-sm hover:bg-gray-50">
           <FaMoneyBill />
           <span className="text-sm">Pay & Join Game</span>
@@ -77,71 +105,76 @@ const GamesList: React.FC = () => {
 
       {/* Grid of cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {fields.map((field) => (
+        {games.slice(0, visibleCount).map((game) => (
           <Link
-            key={field._id}
-            to={`/play/${field._id}`}
+            key={game.id}
+            to={`/play/${game.id}`}
             className="bg-white border rounded-xl shadow-sm hover:shadow-md p-4 block"
           >
-            {/* Type */}
-            <p className="text-sm text-gray-500 mb-2">{field.type}</p>
+            <p className="text-sm text-gray-500 mb-2">{game.type}</p>
 
             <div className="flex justify-between items-center mb-2">
-              {/* Avatar giả định */}
               <div className="flex items-center space-x-2">
                 <img
-                  src={field.image || "https://i.pravatar.cc/100"}
-                  alt={field.name}
-                  className="w-8 h-8 rounded-full object-cover"
+                  src={game.host.avatar || "https://via.placeholder.com/40"}
+                  alt={game.host.name}
+                  className="w-8 h-8 rounded-full"
                 />
               </div>
 
-              {/* Slots & Status */}
+              {game.slots && (
+                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full flex items-center">
+                  🎾 Only {game.slots} Slots
+                </span>
+              )}
+              {game.going && (
+                <span className="text-sm font-semibold text-gray-700">
+                  {game.going.current}/{game.going.total}{" "}
+                  <span className="font-normal">Going</span>
+                </span>
+              )}
+            </div>
+
+            <p className="text-sm text-gray-700 mb-3">
+              {game.host.name} | {game.host.karma} Karma
+            </p>
+
+            <p className="text-gray-900 font-medium text-sm">
+              {game.date}, {game.time}
+            </p>
+
+            <p className="flex items-center text-gray-600 text-sm mt-1">
+              <FaMapMarkerAlt className="mr-1" /> {game.venue} {game.distance}
+            </p>
+
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-xs px-3 py-1 bg-gray-100 rounded-full">{game.level}</span>
               <span
-                className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                  field.status === "OPEN"
+                className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                  game.status === "OPEN"
                     ? "bg-green-100 text-green-600"
-                    : field.status === "BOOKED"
+                    : game.status === "BOOKED"
                     ? "bg-blue-100 text-blue-600"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
-                {field.status}
-              </span>
-            </div>
-
-            {/* Name */}
-            <p className="text-sm text-gray-700 mb-3">{field.name}</p>
-
-            {/* Price */}
-            <p className="text-gray-900 font-medium text-sm">
-              {field.pricePerHour ? `${field.pricePerHour} /hr` : `${field.price} đ`}
-            </p>
-
-            {/* Address */}
-            <p className="flex items-center text-gray-600 text-sm mt-1">
-              <FaMapMarkerAlt className="mr-1" /> {field.address}
-            </p>
-
-            {/* Level giả định */}
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-xs px-3 py-1 bg-gray-100 rounded-full">
-                {field.type || "General"}
-              </span>
-              <span className="text-xs text-gray-500">
-                🕒 {field.availableDays?.join(", ") || "Everyday"}
+                {game.status}
               </span>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Load More */}
-      <div className="flex justify-center mt-10">
-        <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-          Load More
-        </button>
-      </div>
+      {visibleCount < games.length && (
+        <div className="flex justify-center mt-10">
+          <button
+            onClick={handleLoadMore}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            Load More
+          </button>
+        </div>
+      )}
     </section>
   );
 };

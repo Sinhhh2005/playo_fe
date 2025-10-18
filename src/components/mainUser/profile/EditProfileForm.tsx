@@ -66,7 +66,7 @@ const EditProfileForm = () => {
           <label className="block text-sm font-medium text-gray-700">
             Name <span className="text-red-500">*</span>
           </label>
-          <input
+          <input 
             type="text"
             name="firstName"
             value={formData.firstName}

@@ -1,62 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaStar, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-
-const venues = [
-  {
-    id: 1,
-    name: "Nike Miles Swimming...",
-    location: "Sports Block (ashwath ... 1.68 Km)",
-    rating: 4.8,
-    price: "₹300",
-    image: "https://source.unsplash.com/400x250/?swimming,pool",
-    featured: true,
-  },
-  {
-    id: 2,
-    name: "Pickl - The Social Club",
-    location: "The HUB Bengaluru (5.14 Km)",
-    rating: 4.7,
-    price: "₹450",
-    image: "https://source.unsplash.com/400x250/?tennis,court",
-    featured: true,
-  },
-  {
-    id: 3,
-    name: "RSA Ravi’s Turf",
-    location: "75, Cambridge Road, (3.72 Km)",
-    rating: 4.5,
-    price: "₹500",
-    image: "https://source.unsplash.com/400x250/?football,ground",
-    featured: true,
-  },
-  {
-    id: 4,
-    name: "Game Theory - Joseph’s",
-    location: "Geti 3, No.2, Vitta M (3.01 Km)",
-    rating: 4.7,
-    price: "₹400",
-    image: "https://source.unsplash.com/400x250/?badminton,court",
-    featured: false,
-  },
-  {
-    id: 5,
-    name: "Ace Arena",
-    location: "Koramangala (4.2 Km)",
-    rating: 4.6,
-    price: "₹350",
-    image: "https://source.unsplash.com/400x250/?cricket,ground",
-    featured: false,
-  },
-];
+import * as Services from "../../../../services/fieldService";
 
 export default function BookVenues() {
+  const [venues, setVenues] = useState<any[]>([]);
   const [startIndex, setStartIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const itemsPerPage = 4;
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        setLoading(true);
+        const data = await Services.getAllFields();
+
+        // Map backend data về FE structure
+        const mapped = data.map((v: any) => ({
+          id: v.id,
+          name: v.name,
+          location: `${v.district || v.address || "Unknown"}`,
+          rating: v.rating || 4.5,
+          price: v.pricePerHour ? `${v.pricePerHour}₹` : "Free",
+          image: v.imgUrl?.[0] || "https://source.unsplash.com/400x250/?sports",
+          featured: v.featured || false,
+        }));
+
+        setVenues(mapped);
+      } catch (err: any) {
+        console.error("Lỗi khi fetch venues:", err);
+        setError(err?.message || "Không thể tải venues");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVenues();
+  }, []);
 
   const handlePrev = () => {
     setStartIndex((prev) =>
-      prev === 0 ? venues.length - itemsPerPage : prev - 1
+      prev === 0 ? Math.max(venues.length - itemsPerPage, 0) : prev - 1
     );
   };
 
@@ -66,13 +52,15 @@ export default function BookVenues() {
     );
   };
 
+  if (loading) return <div className="p-6 text-center">Đang tải...</div>;
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+  if (!venues.length) return <div className="p-6 text-center text-gray-500">Chưa có venues nào.</div>;
+
   return (
     <section className="mb-10">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Book Venues</h2>
-
-        {/* 🔹 Sửa chỗ này */}
         <Link
           to="/book"
           className="text-green-600 text-sm font-medium hover:underline"
@@ -86,7 +74,7 @@ export default function BookVenues() {
         {venues.slice(startIndex, startIndex + itemsPerPage).map((venue) => (
           <Link
             key={venue.id}
-            to={`/experience-details/:nav/${venue.id}`}
+            to={`/experience-details/venues/${venue.id}`}
             className="bg-white rounded-xl shadow p-3 hover:shadow-lg transition block"
           >
             <div className="relative mb-2">
