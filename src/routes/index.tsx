@@ -5,7 +5,6 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Profile from "../pages/user/Profile";
 import Book from "../pages/user/Book";
-// import Admin from "../pages/admin/AdminLayout";
 import adminRoutes from "./adminRoutes";
 import PrivateRoute from "../components/PrivateRoute";
 import TrainerDetailPage from "../pages/user/trainerDetail/TrainerDetailPage";
@@ -17,6 +16,9 @@ import TrainPage from "../pages/user/train";
 import VenueDetail from "../components/mainUser/Page_book/bookDetail/VenueDetail";
 import BookCart from "../components/mainUser/Page_book/bookCart/BookCart";
 import ownerRoutes from "./ownerRoutes";
+
+// ✅ import thêm FieldDetail
+import FieldDetail from "../pages/user/discoverDetail/MatchDetail";
 
 const router = createBrowserRouter([
 	// Public routes
@@ -42,11 +44,11 @@ const router = createBrowserRouter([
 	},
 	{
 		path: "/experience-details/:nav/:id",
-		element: <VenueDetail />, // <-- thêm chi tiết venue
+		element: <VenueDetail />,
 	},
 	{
 		path: "/booking/:id",
-		element: <BookCart />, // <-- thêm chi tiết venue
+		element: <BookCart />,
 	},
 	{
 		path: "/play/:id",
@@ -61,9 +63,15 @@ const router = createBrowserRouter([
 		element: <TrainerDetailPage />,
 	},
 
+	// ✅ thêm route chi tiết sân để tránh 404
+	{
+		path: "/fields/:id",
+		element: <FieldDetail />,
+	},
+
 	// Protected routes (user + admin)
 	{
-		element: <PrivateRoute roles={["user", "admin", "owner"]} />,
+		element: <PrivateRoute roles={["user", "admin"]} />,
 		children: [
 			{
 				path: "/profile",
@@ -71,13 +79,12 @@ const router = createBrowserRouter([
 			},
 		],
 	},
-	ownerRoutes,
+
 	{
 		element: <PrivateRoute roles={["admin"]} />,
-		children: [
-			adminRoutes,
-		],
+		children: [adminRoutes],
 	},
+	ownerRoutes,
 
 	// 404 fallback
 	{

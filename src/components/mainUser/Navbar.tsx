@@ -12,7 +12,6 @@ const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("User");
   const [role, setRole] = useState("");
-  const [_userId, setUserId] = useState("");
   const [open, setOpen] = useState(false);
 
   // 🟢 Load thông tin user từ localStorage
@@ -20,20 +19,17 @@ const Navbar: React.FC = () => {
     const loadUser = () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const userName = localStorage.getItem("userName") || "User";
-        const role = localStorage.getItem("role") || "";
-        const userId = localStorage.getItem("userId") || "";
+        const storedUser = localStorage.getItem("user");
 
-        if (token) {
+        if (token && storedUser) {
+          const user = JSON.parse(storedUser);
           setIsLoggedIn(true);
-          setUserName(userName);
-          setRole(role);
-          setUserId(userId);
+          setUserName(user.name || user.fullName || "User");
+          setRole(user.role || "");
         } else {
           setIsLoggedIn(false);
           setUserName("User");
           setRole("");
-          setUserId("");
         }
       } catch (error) {
         console.error("Error loading user info:", error);
@@ -42,7 +38,7 @@ const Navbar: React.FC = () => {
 
     loadUser();
 
-    // Lắng nghe thay đổi localStorage (khi login/logout ở tab khác)
+    // 🔹 Lắng nghe thay đổi từ login/logout
     window.addEventListener("storage", loadUser);
     window.addEventListener("userChanged", loadUser);
 
@@ -54,20 +50,25 @@ const Navbar: React.FC = () => {
 
   // 🟡 Logout
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("email");
-    localStorage.removeItem("userId");
+    const keys = [
+      "accessToken",
+      "refreshToken",
+      "role",
+      "user",
+      "userName",
+      "email",
+      "userId",
+    ];
+    keys.forEach((k) => localStorage.removeItem(k));
 
+    // 🔹 Phát sự kiện để đồng bộ UI
     window.dispatchEvent(new Event("userChanged"));
+
     setIsLoggedIn(false);
     setUserName("User");
     setRole("");
-    setUserId("");
     setOpen(false);
+
     navigate("/login");
   };
 
@@ -75,9 +76,7 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(".profile-dropdown")) {
-        setOpen(false);
-      }
+      if (!target.closest(".profile-dropdown")) setOpen(false);
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);

@@ -1,38 +1,36 @@
-import axios from "axios";
+// src/services/fieldService.ts
+import axiosClient from "../utils/axiosClient";
 
-const API_URL = "http://localhost:5000/api/fields";
+const BASE_URL = "/fields"; // ✅ tương ứng với router.use("/fields", fieldRoutes);
 
-// Lấy tất cả field
+// Lấy toàn bộ danh sách sân
 export const getAllFields = async () => {
-  const res = await axios.get(API_URL);
-  return res.data;
+  // ✅ khớp với router.get("/venues", getAllFields);
+  const response = await axiosClient.get(`${BASE_URL}/venues`);
+  return response.data;
 };
 
-// Lấy field theo ID
+// Lấy chi tiết sân theo id
 export const getFieldById = async (id: string) => {
-  const res = await axios.get(`${API_URL}/${id}`);
-  return res.data;
+  // ✅ khớp với router.get("/venue/:id", getFieldById);
+  const response = await axiosClient.get(`${BASE_URL}/venue/${id}`);
+  return response.data;
 };
 
-// Tạo mới field
-export const createField = async (data: {
-  name: string;
-  positionId: string;
-  categoryId: string;
-  [key: string]: any;
-}) => {
-  const res = await axios.post(API_URL, data);
-  return res.data;
+// Tạo mới sân
+export const createField = async (data: any) => {
+  const response = await axiosClient.post(`${BASE_URL}/venue`, data);
+  return response.data;
 };
 
-// Cập nhật field
+// Cập nhật sân
 export const updateField = async (id: string, data: any) => {
-  const res = await axios.put(`${API_URL}/${id}`, data);
-  return res.data;
+  const response = await axiosClient.put(`${BASE_URL}/venue/${id}`, data);
+  return response.data;
 };
 
-// Xóa field
+// Xóa sân
 export const deleteField = async (id: string) => {
-  const res = await axios.delete(`${API_URL}/${id}`);
-  return res.data;
+  const response = await axiosClient.delete(`${BASE_URL}/venue/${id}`);
+  return response.data;
 };

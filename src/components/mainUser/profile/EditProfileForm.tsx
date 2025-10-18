@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { getUserById, updateUser } from "../../../services/userService";
 
 const EditProfileForm = () => {
   const [formData, setFormData] = useState({
@@ -9,87 +8,45 @@ const EditProfileForm = () => {
     email: "",
   });
 
-  const [loading, setLoading] = useState(true);
-
+  // 🔹 Lấy dữ liệu user đã đăng ký từ localStorage
   useEffect(() => {
-    const fetchProfile = async () => {
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const storedEmail = localStorage.getItem("email") || "";
-
-      if (!storedUser?.id) {
-        console.warn("⚠️ Không tìm thấy user trong localStorage");
-        setFormData({
-          firstName: "",
-          lastName: "",
-          phone: "",
-          email: storedEmail,
-        });
-        setLoading(false);
-        return;
-      }
-
-      // 🟢 Gọi service lấy user theo ID
-      const res = await getUserById(storedUser.id);
-      if (res.success && res.data) {
-        const user = res.data;
-        const nameParts = user.name ? user.name.split(" ") : ["", ""];
-        setFormData({
-          firstName: nameParts[0] || "",
-          lastName: nameParts.slice(1).join(" ") || "",
-          phone: user.phone || "",
-          email: user.email || storedEmail,
-        });
-      } else {
-        console.error("❌ Lỗi lấy thông tin user:", res.message);
-        setFormData({
-          firstName: "",
-          lastName: "",
-          phone: "",
-          email: storedEmail,
-        });
-      }
-
-      setLoading(false);
-    };
-
-    fetchProfile();
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phone: user.phone || "",
+        email: user.email || "",
+      });
+    }
   }, []);
 
-  // 🟡 Handle change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 🔁 Reset form
   const handleReset = () => {
-    window.location.reload();
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phone: user.phone || "",
+        email: user.email || "",
+      });
+    }
   };
 
-  // 🟢 Submit form
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Saved:", formData);
 
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    if (!storedUser?.id) {
-      alert("⚠️ Không tìm thấy user!");
-      return;
-    }
-
-    const updatedData = {
-      name: `${formData.firstName} ${formData.lastName}`.trim(),
-      phone: formData.phone,
-    };
-
-    const res = await updateUser(storedUser.id, updatedData);
-
-    if (res.success) {
-      alert("✅ Cập nhật hồ sơ thành công!");
-    } else {
-      alert(`⚠️ Lỗi: ${res.message}`);
-    }
+    // 🔹 Update lại user trong localStorage
+    localStorage.setItem("user", JSON.stringify(formData));
+    alert("Profile updated successfully!");
   };
-
-  if (loading) return <p className="text-center py-6">Loading profile...</p>;
 
   return (
     <form
@@ -107,14 +64,14 @@ const EditProfileForm = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            First Name <span className="text-red-500">*</span>
+            Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             name="firstName"
             value={formData.firstName}
             onChange={handleChange}
-            placeholder="First Name"
+            placeholder="Name"
             className="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-500"
           />
         </div>

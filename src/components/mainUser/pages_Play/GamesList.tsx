@@ -1,19 +1,37 @@
-import React from "react";
+// src/pages/user/GamesList.tsx
+import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaCalendarAlt, FaFilter, FaMoneyBill } from "react-icons/fa";
 import { GiTennisBall } from "react-icons/gi";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { Link } from "react-router-dom";
-
-import { games } from "../../../data/games";  // ✅ import data từ file ngoài
-import type { Game } from "../../../data/games";
+import { getAllFields } from "../../../services/fieldService";
+import type { Field } from "../../../types/field";
 
 const GamesList: React.FC = () => {
+  const [fields, setFields] = useState<Field[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      try {
+        const data = await getAllFields();
+        setFields(data);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách sân:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFields();
+  }, []);
+
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+
   return (
     <section className="max-w-6xl mx-auto px-4 py-8">
       {/* Title + Download App */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Games in Bangalore</h1>
-
+        <h1 className="text-2xl font-bold text-gray-800">Games</h1>
         <div className="flex items-center mt-4 md:mt-0">
           <span className="text-sm mr-2">To create a game, download Playo app</span>
           <img
@@ -59,69 +77,59 @@ const GamesList: React.FC = () => {
 
       {/* Grid of cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {games.map((game: Game) => (
+        {fields.map((field) => (
           <Link
-            key={game.id}
-            to={`/play/${game.id}`}
+            key={field._id}
+            to={`/play/${field._id}`}
             className="bg-white border rounded-xl shadow-sm hover:shadow-md p-4 block"
           >
-            {/* Header */}
-            <p className="text-sm text-gray-500 mb-2">{game.type}</p>
+            {/* Type */}
+            <p className="text-sm text-gray-500 mb-2">{field.type}</p>
 
             <div className="flex justify-between items-center mb-2">
-              {/* Avatar */}
+              {/* Avatar giả định */}
               <div className="flex items-center space-x-2">
                 <img
-                  src={game.host.avatar}
-                  alt={game.host.name}
-                  className="w-8 h-8 rounded-full"
+                  src={field.image || "https://i.pravatar.cc/100"}
+                  alt={field.name}
+                  className="w-8 h-8 rounded-full object-cover"
                 />
               </div>
 
-              {/* Slots / Going */}
-              {game.slots && (
-                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full flex items-center">
-                  🎾 Only {game.slots} Slots
-                </span>
-              )}
-              {game.going && (
-                <span className="text-sm font-semibold text-gray-700">
-                  {game.going.current}/{game.going.total}{" "}
-                  <span className="font-normal">Going</span>
-                </span>
-              )}
-            </div>
-
-            {/* Host name + Karma */}
-            <p className="text-sm text-gray-700 mb-3">
-              {game.host.name} | {game.host.karma} Karma
-            </p>
-
-            {/* Date & Time */}
-            <p className="text-gray-900 font-medium text-sm">
-              {game.date}, {game.time}
-            </p>
-
-            {/* Venue */}
-            <p className="flex items-center text-gray-600 text-sm mt-1">
-              <FaMapMarkerAlt className="mr-1" /> {game.venue} {game.distance}
-            </p>
-
-            {/* Level + Status */}
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-xs px-3 py-1 bg-gray-100 rounded-full">
-                {game.level}
-              </span>
+              {/* Slots & Status */}
               <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                  game.status === "OPEN"
+                className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  field.status === "OPEN"
                     ? "bg-green-100 text-green-600"
-                    : game.status === "BOOKED"
+                    : field.status === "BOOKED"
                     ? "bg-blue-100 text-blue-600"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
-                {game.status}
+                {field.status}
+              </span>
+            </div>
+
+            {/* Name */}
+            <p className="text-sm text-gray-700 mb-3">{field.name}</p>
+
+            {/* Price */}
+            <p className="text-gray-900 font-medium text-sm">
+              {field.pricePerHour ? `${field.pricePerHour} /hr` : `${field.price} đ`}
+            </p>
+
+            {/* Address */}
+            <p className="flex items-center text-gray-600 text-sm mt-1">
+              <FaMapMarkerAlt className="mr-1" /> {field.address}
+            </p>
+
+            {/* Level giả định */}
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-xs px-3 py-1 bg-gray-100 rounded-full">
+                {field.type || "General"}
+              </span>
+              <span className="text-xs text-gray-500">
+                🕒 {field.availableDays?.join(", ") || "Everyday"}
               </span>
             </div>
           </Link>

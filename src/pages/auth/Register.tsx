@@ -5,7 +5,7 @@ import { register } from "../../services/authService";
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState(""); // 🆕 thêm phone
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,21 +15,24 @@ const Register = () => {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !phone || !password) {
-      setError("Vui lòng nhập đầy đủ thông tin");
+    if (!name || !email || !password) {
+      setError("Vui lòng nhập đầy đủ thông tin bắt buộc");
       return;
     }
 
     try {
       setLoading(true);
-      const response = await register({ name, email, phone, password });
+      const response = await register({ name, email, password, phone });
 
       if (response.success) {
-        alert("Đăng ký thành công! Hãy đăng nhập.");
+        alert("🎉 Đăng ký thành công! Hãy đăng nhập để tiếp tục.");
         navigate("/login");
       } else {
-        setError(response.message || "Đăng ký thất bại");
+        setError(response.message || "Đăng ký thất bại. Vui lòng thử lại.");
       }
+    } catch (err: any) {
+      console.error("Register error:", err);
+      setError("Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -59,7 +62,7 @@ const Register = () => {
           />
           <input
             type="tel"
-            placeholder="Phone Number"
+            placeholder="Phone (optional)"
             className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
