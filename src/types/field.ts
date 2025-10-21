@@ -6,16 +6,14 @@ export interface Venue {
   phone?: string;
 }
 
-export type FieldStatus = "OPEN" | "BOOKED" | "LIMITED" | "CLOSED";
-
-export interface Field {
+export interface FieldRequest {
   _id: string;
   name: string;
   type: string; // Ví dụ: "Badminton", "Football"
+  status: "Pending" | "Approved" | "Rejected";
   price: number;
   pricePerHour?: number | string;
   image?: string;
-  status: FieldStatus;
   description?: string;
   contactName?: string;
   contactPhone?: string;
