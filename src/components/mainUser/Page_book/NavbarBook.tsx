@@ -190,8 +190,19 @@ const NavbarBook = () => {
                       to="/profile"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg"
                     >
-                      {user.name}'s Profile
+                      Profile
                     </Link>
+
+                    {/* 🟢 Nếu là admin */}
+									{user && user.role === "admin" && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setOpenProfile(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-b-lg"

@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import { FaSignOutAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const AdminLayout = () => {
@@ -27,25 +26,7 @@ const AdminLayout = () => {
 						to="/admin/fieldManagement"
 						className="block p-2 hover:bg-gray-700 rounded"
 					>
-						🏟️ Quản lý chủ sân
-					</Link>
-					<Link
-						to="/systemManagement"
-						className="block p-2 hover:bg-gray-700 rounded"
-					>
-						⚙️ Quản lý hệ thống
-					</Link>
-					<Link
-						to="/promotionManagement"
-						className="block p-2 hover:bg-gray-700 rounded"
-					>
-						📢 Quản lý khuyến mãi
-					</Link>
-					<Link
-						to="/complaintManagement"
-						className="block p-2 hover:bg-gray-700 rounded"
-					>
-						📩 Quản lý khiếu nại
+						🏟️ Quản lý Sân bóng
 					</Link>
 					<Link
 						to="/reports"
@@ -69,19 +50,7 @@ const AdminLayout = () => {
 					{/* Logo / Title */}
 					<div className="flex items-center gap-2 font-bold text-lg">
 						<span>Admin Dashboard</span>
-					</div>
-
-					{/* Search */}
-					{/* <div className="flex-1 max-w-md mx-6">
-						<div className="relative">
-							<FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 hover:text-gray-500 cursor-pointer" />
-							<input
-								type="text"
-								placeholder="Search..."
-								className="w-full pl-10 pr-4 py-2 border rounded-lg hover:border-gray-600 "
-							/>
-						</div>
-					</div> */}
+					</div>			
 
 					{/* User Info + Logout */}
 					<div className="flex items-center gap-4">
@@ -93,16 +62,12 @@ const AdminLayout = () => {
 							/>
 							<span className="font-medium">Admin</span>
 						</div>
-						<button className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-							<FaSignOutAlt />
-							Logout
-						</button>
 					</div>
 				</header>
 
 				{/* CONTENT + FOOTER */}
 				<div className="mt-16 flex flex-col w-full h-[calc(100vh-4rem)] overflow-y-auto bg-gray-50">
-					<main className="flex-1 p-6">
+					<main className="flex-1 overflow-y-auto px-6">
 						<Outlet />
 					</main>
 					<footer className="h-12 bg-gray-200 flex items-center justify-center py-8">

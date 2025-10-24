@@ -1,24 +1,23 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-// 🔹 Khai báo kiểu props
 interface PrivateRouteProps {
-	roles?: string[]; // Optional, có thể là ["admin", "user"] ...
+  roles?: string[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ roles }) => {
-	const token = localStorage.getItem("accessToken");
-	const userRole = localStorage.getItem("role"); // giả sử backend trả về role khi login
+  const token = localStorage.getItem("accessToken");
+  const userRole = localStorage.getItem("role")?.toLowerCase();
 
-	if (!token) {
-		return <Navigate to="/login" replace />;
-	}
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
-	// Nếu có roles (ví dụ: ["admin"]) thì check thêm quyền
-	if (roles && !roles.includes(userRole || "")) {
-		return <Navigate to="/" replace />;
-	}
+  // Nếu có danh sách roles thì kiểm tra quyền
+  if (roles && userRole && !roles.map(r => r.toLowerCase()).includes(userRole)) {
+    return <Navigate to="/" replace />;
+  }
 
-	return <Outlet />;
+  return <Outlet />;
 };
 
 export default PrivateRoute;

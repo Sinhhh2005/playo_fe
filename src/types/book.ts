@@ -7,30 +7,24 @@ export type Event = {
   image: string;
   type: 'trek' | 'sports' | 'badminton' | 'swimming';
 }
-
-export type Venue = {
-  id: number;
-  title: string;
-  location: string;
-  distance: string;
-  type: string;
-  rating: number;
-  reviews: number;
-  featured?: boolean;
-  image: string;
-  // ✅ Thêm mới các field
-  sportsAvailable?: {
-    name: string;
-    icon: string; // icon dạng emoji hoặc URL đều được
-  }[];
-
-  amenities?: string[];
-
-  aboutVenue?: string[];
-
-  relatedVenues?: string[];
-
-}
+export type Category = {
+	id: number;
+	name: string;
+	district?: string;
+	address?: string;
+	pricePerHour?: number;
+	imgUrl?: string | string[]; // Tên trùng backend
+	description?: string;
+	desShort?: string;
+	sportId?: number;
+	sport?: {
+		id: number;
+		name: string;
+	};
+	amenities?: string[] | string;
+	createdAt?: string;
+	updatedAt?: string;
+};
 
 export type Deal = {
   id: number;

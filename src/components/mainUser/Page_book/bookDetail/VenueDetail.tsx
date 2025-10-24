@@ -9,7 +9,6 @@ import Footer from "../../Footer";
 import ScrollToTop from "../../../ScrollToTop";
 import * as FieldService from "../../../../services/fieldService";
 
-// Fallback data nếu backend không có
 const fallbackSportsAvailable = [
   { name: "Tennis", icon: "🎾" },
   { name: "Badminton", icon: "🏸" },
@@ -20,6 +19,7 @@ const fallbackAboutVenue = [
   "Easy parking available",
   "Water and refreshments provided",
 ];
+const fallbackImage = "https://via.placeholder.com/400x250?text=No+Image";
 
 export default function VenueDetail() {
   const { id } = useParams<{ id: string }>();
@@ -44,19 +44,21 @@ export default function VenueDetail() {
           return;
         }
 
-        // Map dữ liệu backend về structure FE
+        // ✅ Chuẩn hoá dữ liệu từ backend
         const mappedVenue = {
           id: data.id,
           title: data.name || "Unknown Venue",
           location: data.address || data.district || "Unknown location",
+          // ✅ Ưu tiên lấy ảnh từ field (images[] hoặc imgUrl)
           image:
-            data.images && data.images.length > 0
-              ? data.images[0]
-              : "https://via.placeholder.com/400x250?text=No+Image",
+            (Array.isArray(data.images) && data.images.length > 0 && data.images[0]) ||
+            data.imgUrl ||
+            fallbackImage,
           sportsAvailable: data.sportsAvailable || fallbackSportsAvailable,
           amenities: data.amenities || ["Lighting", "Parking", "Water Facility"],
           aboutVenue: data.aboutVenue || fallbackAboutVenue,
           relatedVenues: data.relatedVenues || [],
+          price: data.pricePerHour || data.price || 0,
         };
 
         setVenue(mappedVenue);
@@ -86,12 +88,13 @@ export default function VenueDetail() {
       <div className="flex px-24 py-8 gap-8">
         {/* LEFT CONTENT */}
         <div className="flex-[2] space-y-8">
-          {/* Main Image */}
+          {/* Ảnh chính */}
           <div className="rounded-lg overflow-hidden">
             <img
               src={venue.image}
               alt={venue.title}
               className="h-full w-full object-cover rounded-lg"
+              onError={(e) => (e.currentTarget.src = fallbackImage)}
             />
           </div>
 
@@ -121,7 +124,9 @@ export default function VenueDetail() {
           {/* Amenities */}
           {venue.amenities && (
             <div className="border rounded-xl bg-white p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">Amenities</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                Amenities
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-3">
                 {venue.amenities.map((a: string, i: number) => (
                   <div key={i} className="flex items-center gap-2">
@@ -136,7 +141,9 @@ export default function VenueDetail() {
           {/* About Venue */}
           {venue.aboutVenue && (
             <div className="border rounded-xl bg-white p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">About Venue</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                About Venue
+              </h2>
               <ul className="list-disc ml-6 space-y-1 text-gray-700">
                 {venue.aboutVenue.map((rule: string, i: number) => (
                   <li key={i}>{rule}</li>
@@ -148,7 +155,6 @@ export default function VenueDetail() {
 
         {/* RIGHT CONTENT */}
         <div className="flex-[1] flex flex-col gap-4">
-          {/* Book Button */}
           <Link
             to={`/booking/${venue.id}`}
             className="flex justify-center bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg cursor-pointer"
@@ -156,7 +162,6 @@ export default function VenueDetail() {
             Book Now
           </Link>
 
-          {/* Share + Bulk */}
           <div className="flex gap-4">
             <button className="flex-1 border-[2px] border-gray-300 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 cursor-pointer">
               <Share2 size={18} /> Share
@@ -166,7 +171,6 @@ export default function VenueDetail() {
             </button>
           </div>
 
-          {/* Timing */}
           <div className="border border-gray-200 rounded-lg p-4">
             <h3 className="text-lg font-semibold mb-2">Timing</h3>
             <p className="text-gray-700 flex items-center gap-2">
@@ -174,10 +178,9 @@ export default function VenueDetail() {
             </p>
           </div>
 
-          {/* Location */}
           <div className="border border-gray-200 rounded-lg p-4 space-y-3">
             <h3 className="text-lg font-semibold">Location</h3>
-            <p className="text-sm text-gray-300">{venue.location}</p>
+            <p className="text-sm text-gray-600">{venue.location}</p>
             <iframe
               src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(
                 venue.location

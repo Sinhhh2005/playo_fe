@@ -1,14 +1,26 @@
+import { useEffect, useState } from "react";
+
 interface SidebarProps {
   activeTab: "bookings" | "edit" | "feedback";
   setActiveTab: (tab: "bookings" | "edit" | "feedback") => void;
 }
 
 const ProfileSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
+  const [email, setEmail] = useState<string>("");
+
+  useEffect(() => {
+    // 🟢 Lấy email user từ localStorage
+    const userEmail = localStorage.getItem("email");
+    if (userEmail) {
+      setEmail(userEmail);
+    }
+  }, []);
+
   return (
     <div className="w-64 bg-white shadow rounded-lg p-4">
       <div className="flex flex-col items-center mb-6">
         <div className="w-16 h-16 rounded-full bg-gray-400"></div>
-        <p className="mt-2 text-sm">sinhngo2003@gmail.com</p>
+        <p className="mt-2 text-sm">{email || "user@example.com"}</p>
       </div>
 
       <ul className="space-y-2">

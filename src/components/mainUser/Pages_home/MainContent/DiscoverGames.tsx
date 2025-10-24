@@ -1,32 +1,29 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaUser,
   FaMapMarkerAlt,
   FaChevronLeft,
   FaChevronRight,
-  FaRunning,
 } from "react-icons/fa";
 import * as Services from "../../../../services";
 
-interface Venue {
+interface Game {
   id: string;
-  name: string;
-  address: string;
-}
-
-interface Field {
-  id: string;
-  name: string;
   type: string;
-  price: number;
+  host: {
+    name: string;
+    avatar: string;
+    karma: number;
+  };
+  venue: string;
+  distance: string;
+  price: string;
   status: "OPEN" | "BOOKED" | "LIMITED" | "CLOSED";
-  image?: string;
-  venue: Venue;
+  slots: number;
 }
 
 export default function DiscoverGames() {
-  const [fields, setFields] = useState<Field[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [startIndex, setStartIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,12 +31,37 @@ export default function DiscoverGames() {
   const itemsPerPage = 4;
 
   useEffect(() => {
-    const fetchFields = async () => {
+    const fetchGames = async () => {
       try {
         setLoading(true);
         const result = await Services.FieldService.getAllFields();
         const data = Array.isArray(result) ? result : result.data || [];
-        setFields(data);
+
+        const mappedGames: Game[] = data.map((g: any, index: number) => ({
+          id: g.id,
+          type: g.sportName || `Sport ${g.sportId}`,
+          host: {
+            name: g.contactName || `Host ${index + 1}`,
+            avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(
+              g.contactName || g.name || `host${index}`
+            )}`,
+            karma: Math.floor(Math.random() * 5000) + 100,
+          },
+          venue: g.name || "Unnamed Venue",
+          distance: g.district || `${(Math.random() * 10).toFixed(2)} km`,
+          price: g.pricePerHour ? `${g.pricePerHour} đ/h` : "N/A",
+          status:
+            g.status === "active"
+              ? "OPEN"
+              : g.status === "limited"
+              ? "LIMITED"
+              : g.status === "booked"
+              ? "BOOKED"
+              : "CLOSED",
+          slots: g.stock || 0,
+        }));
+
+        setGames(mappedGames);
       } catch (err: any) {
         console.error("DiscoverGames fetch error:", err);
         setError(err?.message || "Không thể tải danh sách sân");
@@ -48,24 +70,27 @@ export default function DiscoverGames() {
       }
     };
 
-    fetchFields();
+    fetchGames();
   }, []);
 
   const handlePrev = () => {
     setStartIndex((prev) =>
-      prev === 0 ? Math.max(fields.length - itemsPerPage, 0) : prev - 1
+      prev === 0 ? Math.max(games.length - itemsPerPage, 0) : prev - 1
     );
   };
 
   const handleNext = () => {
     setStartIndex((prev) =>
-      prev + itemsPerPage >= fields.length ? 0 : prev + 1
+      prev + itemsPerPage >= games.length ? 0 : prev + 1
     );
   };
 
-  if (loading) return <div className="p-10 text-center">Đang tải danh sách sân...</div>;
-  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
-  if (fields.length === 0) return <div className="p-10 text-center text-gray-500">Chưa có sân nào.</div>;
+  if (loading)
+    return <div className="p-10 text-center">Đang tải danh sách sân...</div>;
+  if (error)
+    return <div className="p-10 text-center text-red-500">{error}</div>;
+  if (games.length === 0)
+    return <div className="p-10 text-center text-gray-500">Chưa có sân nào.</div>;
 
   return (
     <section className="mb-10">
@@ -82,25 +107,22 @@ export default function DiscoverGames() {
 
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {fields.slice(startIndex, startIndex + itemsPerPage).map((field) =>
-          field.id ? (
+        {games.slice(startIndex, startIndex + itemsPerPage).map((game) =>
+          game.id ? (
             <Link
-              key={field.id}
-              to={`/play/${field.id}`}
+              key={game.id}
+              to={`/play/${game.id}`}
               className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-4 block"
             >
               {/* Type */}
               <p className="text-sm text-gray-500 mb-2 font-medium">
-                {field.type || "Regular"}
+                {game.type || "Regular"}
               </p>
 
               {/* Host */}
               <div className="flex items-center mb-3">
                 <img
-                  src={
-                    field.image ||
-                    "https://playo-website.gumlet.io/playo-website-v3/playo-default-profile.png"
-                  }
+                  src={game.host.avatar}
                   alt="avatar"
                   className="w-8 h-8 rounded-full mr-2"
                 />
@@ -109,13 +131,12 @@ export default function DiscoverGames() {
                     {Math.floor(Math.random() * 10) + 1} Going
                   </p>
                   <p className="text-xs text-gray-600">
-                    {field.venue?.name?.split(" ")[0] || "Host"} |{" "}
-                    {Math.floor(Math.random() * 5000) + 100} Karma
+                    {game.host.name.split(" ")[0]} | {game.host.karma} Karma
                   </p>
                 </div>
               </div>
 
-              {/* Date & Time (hardcoded for now) */}
+              {/* Date & Time */}
               <p className="text-sm text-gray-800 font-medium mb-2">
                 Sat, 18 Oct 2025, 07:30 PM - 09:30 PM
               </p>
@@ -123,27 +144,26 @@ export default function DiscoverGames() {
               {/* Venue */}
               <p className="flex items-center text-sm text-gray-600 mb-2">
                 <FaMapMarkerAlt className="mr-2 text-gray-500" />
-                {field.venue?.name || "Feather Touch Sports"} ~{" "}
-                {(Math.random() * 10).toFixed(2)} Kms
+                {game.venue} ~ {game.distance}
               </p>
 
-              {/* Level */}
+              {/* Level + Status */}
               <div className="flex justify-between items-center">
                 <span className="text-xs border rounded-full px-3 py-1 text-gray-700">
                   Beginner - Professional
                 </span>
                 <span
                   className={`text-xs px-2 py-1 rounded font-medium ${
-                    field.status === "BOOKED"
+                    game.status === "BOOKED"
                       ? "bg-green-100 text-green-700 border border-green-600"
-                      : field.status === "LIMITED"
+                      : game.status === "LIMITED"
                       ? "bg-yellow-100 text-yellow-700 border border-yellow-500"
-                      : field.status === "OPEN"
+                      : game.status === "OPEN"
                       ? "bg-blue-100 text-blue-700 border border-blue-500"
                       : "bg-gray-100 text-gray-600 border border-gray-400"
                   }`}
                 >
-                  {field.status}
+                  {game.status}
                 </span>
               </div>
             </Link>

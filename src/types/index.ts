@@ -1,12 +1,6 @@
-// User
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  password?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export type { User } from "./user";
+export type { Category } from "./book";
+export type { Field } from "./field";
 
 // Role
 export interface Role {
@@ -20,7 +14,7 @@ export interface UserRole {
   id: string;
   userId: string;
   roleId: string;
-  user?: User;
+  user?: import("./user").User;
   role?: Role;
 }
 
@@ -32,14 +26,7 @@ export interface Profile {
   address?: string;
   bio?: string;
   avatarUrl?: string;
-  user?: User;
-}
-
-// Category
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
+  user?: import("./user").User;
 }
 
 // Position
@@ -50,16 +37,6 @@ export interface Position {
   longitude?: number;
 }
 
-// Field
-export interface Field {
-  id: string;
-  name: string;
-  categoryId: string;
-  positionId: string;
-  category?: Category;
-  position?: Position;
-}
-
 // Slot
 export interface Slot {
   id: string;
@@ -67,22 +44,22 @@ export interface Slot {
   startTime: string;
   endTime: string;
   status: "available" | "booked" | "unavailable";
-  field?: Field;
+  isAvailable?: boolean;
+  field?: import("./field").Field;
 }
 
-export type Booking = {
-  id: string; 
+export interface Booking {
+  id: string;
   userId: string;
   slotId: string;
-  venueId: string;
-  venueName: string; // từ backend map sẵn
-  sportName: string; // từ backend map sẵn
+  venueId: string | number;
+  venueName: string;
+  sportName: string;
   bookingDate: string;
   startTime: string;
   endTime: string;
   price: number;
-};
-
+}
 
 // Payment
 export interface Payment {
@@ -99,10 +76,10 @@ export interface Review {
   id: string;
   userId: string;
   fieldId: string;
-  rating: number; // 1–5
+  rating: number;
   comment?: string;
-  user?: User;
-  field?: Field;
+  user?: import("./user").User;
+  field?: import("./field").Field;
 }
 
 // RefreshToken
@@ -111,5 +88,14 @@ export interface RefreshToken {
   userId: string;
   token: string;
   expiryDate: string;
-  user?: User;
+  user?: import("./user").User;
+}
+
+// Sport
+export interface Sport {
+  id: string | number;
+  name: string;
+  description: string;
+  imgUrl?: string;
+  iconUrl?: string;
 }

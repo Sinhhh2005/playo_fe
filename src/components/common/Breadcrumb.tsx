@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import type { Venue } from "../../types/book";
+import type { Venue } from "../../types/field"; 
 
 interface BreadcrumbItem {
 	label: string;
@@ -21,7 +21,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ venue }) => {
 		const isLast = index === pathnames.length - 1;
 		const label =
 			isLast && venue
-				? venue.title
+				? venue.name
 				: decodeURIComponent(
 						value.charAt(0).toUpperCase() + value.slice(1)
 				  );

@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaCalendarAlt, FaMapMarkerAlt, FaUser } from "react-icons/fa";
 import UserLayout from "../../../layouts/UserLayout";
-import * as Services from "../../../services"; // fieldService
-import { venues as staticVenues } from "../../../data/venues";
+import * as Services from "../../../services";
 
 export default function MatchDetail() {
   const { id } = useParams<{ id: string }>();
   const [game, setGame] = useState<any>();
   const [similarGames, setSimilarGames] = useState<any[]>([]);
+  const [nearbyVenues, setNearbyVenues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,21 +23,19 @@ export default function MatchDetail() {
       try {
         setLoading(true);
 
-        // Fetch chi tiết
+        // --- Fetch chi tiết sân ---
         const data = await Services.FieldService.getFieldById(id);
-
         if (!data) {
           setError("Game không tồn tại");
           return;
         }
 
-        // Map dữ liệu backend
         const mappedGame = {
           id: data.id,
           type: data.sportName || `Sport ${data.sportId}`,
           host: {
             name: data.contactName || "Unknown",
-            avatar: "", // placeholder
+            avatar: data.image || "https://via.placeholder.com/48",
             karma: 0,
           },
           date: data.date || "TBD",
@@ -45,7 +43,7 @@ export default function MatchDetail() {
           venue: data.name,
           distance: data.district,
           slots: data.stock,
-          price: data.pricePerHour,
+          price: data.pricePerHour ? `${data.pricePerHour} đ/h` : "N/A",
           status: data.status === "active" ? "OPEN" : "CLOSED",
           level: "Beginner",
           going: { current: 0, total: data.stock || 0 },
@@ -53,7 +51,7 @@ export default function MatchDetail() {
 
         setGame(mappedGame);
 
-        // Fetch similar games
+        // --- Fetch các sân tương tự ---
         const allFields = await Services.FieldService.getAllFields();
         const mappedSimilar = allFields
           .filter((g: any) => g.id !== data.id)
@@ -67,13 +65,16 @@ export default function MatchDetail() {
             venue: g.name,
             distance: g.district,
             slots: g.stock,
-            price: g.pricePerHour,
+            price: g.pricePerHour ? `${g.pricePerHour} đ/h` : "N/A",
             status: g.status === "active" ? "OPEN" : "CLOSED",
             level: "Beginner",
             going: { current: 0, total: g.stock || 0 },
+            image: g.imgUrl || g.image || "https://via.placeholder.com/100",
           }));
 
         setSimilarGames(mappedSimilar);
+        setNearbyVenues(mappedSimilar); // Dùng lại để hiển thị “Venues Nearby”
+
       } catch (err: any) {
         console.error("Lỗi khi fetch match detail:", err);
         setError(err?.message || "Không thể tải game");
@@ -94,6 +95,7 @@ export default function MatchDetail() {
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Game Detail */}
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="flex justify-between items-start">
               <div>
@@ -164,23 +166,37 @@ export default function MatchDetail() {
               {similarGames.map((sim) => (
                 <Link key={sim.id} to={`/play/${sim.id}`}>
                   <div className="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                    {/* Ảnh sân */}
+                    <img
+                      src={sim.image}
+                      alt={sim.venue}
+                      className="w-full h-32 object-cover rounded-lg mb-2"
+                    />
+
+                    {/* Loại sân */}
                     <p className="text-xs text-gray-500">{sim.type}</p>
-                    <p className="text-sm font-medium mt-1">
-                      {sim.going ? `${sim.going.current}/${sim.going.total} Going` : "No players yet"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {sim.host.name} • {sim.host.karma} Karma
-                    </p>
-                    <p className="text-xs mt-2">{sim.date}, {sim.time}</p>
-                    <p className="text-xs text-gray-500">{sim.venue} ({sim.distance})</p>
-                    {sim.level && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded mt-2 inline-block">
-                        {sim.level}
+
+                    {/* Số slot còn trống */}
+                    {sim.slots !== undefined && (
+                      <span className="inline-flex items-center text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full mb-2 mt-1">
+                        🎾 Only {sim.slots} Slots
                       </span>
                     )}
-                    {sim.price && (
-                      <span className="ml-2 text-xs text-green-600">{sim.price}</span>
-                    )}
+
+                    {/* Host */}
+                    <p className="text-xs text-gray-500">
+                      {sim.host?.name} • {sim.host?.karma} Karma
+                    </p>
+
+                    {/* Ngày giờ */}
+                    <p className="text-xs mt-2">
+                      {sim.date}, {sim.time}
+                    </p>
+
+                    {/* Địa điểm */}
+                    <p className="text-xs text-gray-500">
+                      {sim.venue} ({sim.distance})
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -208,35 +224,34 @@ export default function MatchDetail() {
           </div>
 
           {/* Venues Nearby */}
-<div className="bg-white rounded-2xl shadow p-6">
-  <h3 className="font-semibold mb-3">Venues Nearby</h3>
-  <ul className="space-y-3 text-sm text-gray-700">
-    {staticVenues.map((venue) => (
-      <Link
-        key={venue.id}
-        to={`/experience-details/venue/${venue.id}`}
-        className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-lg transition"
-      >
-        <img
-          src={venue.image}
-          alt={venue.name}
-          className="w-10 h-10 rounded-lg"
-        />
-        <div>
-          <p>{venue.name}</p>
-          <p className="text-xs text-gray-500">{venue.distance}</p>
-        </div>
-      </Link>
-    ))}
-  </ul>
-  <Link
-    to="/book"
-    className="mt-4 border border-gray-300 px-4 py-2 rounded-lg text-sm w-full inline-block text-center hover:bg-gray-100"
-  >
-    SEE ALL VENUES
-  </Link>
-</div>
-
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h3 className="font-semibold mb-3">Venues Nearby</h3>
+            <ul className="space-y-3 text-sm text-gray-700">
+              {nearbyVenues.map((venue) => (
+                <Link
+                  key={venue.id}
+                  to={`/experience-details/venue/${venue.id}`}
+                  className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-lg transition"
+                >
+                  <img
+                    src={venue.image}
+                    alt={venue.venue}
+                    className="w-10 h-10 rounded-lg object-cover"
+                  />
+                  <div>
+                    <p>{venue.venue}</p>
+                    <p className="text-xs text-gray-500">{venue.distance}</p>
+                  </div>
+                </Link>
+              ))}
+            </ul>
+            <Link
+              to="/book"
+              className="mt-4 border border-gray-300 px-4 py-2 rounded-lg text-sm w-full inline-block text-center hover:bg-gray-100"
+            >
+              SEE ALL VENUES
+            </Link>
+          </div>
         </div>
       </div>
     </UserLayout>
