@@ -56,7 +56,14 @@ export interface Field {
   id?: number | string;
   name?: string;
   imgUrl?: string | string[];
-};
+  }; 
+  venue?: {
+    id: string;
+    name: string;
+    address?: string;
+    image?: string;
+    phone?: string;
+  };
 }
 
 // 📝 Dùng khi gửi request (POST/PUT) lên server
