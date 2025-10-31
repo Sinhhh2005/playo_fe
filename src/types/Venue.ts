@@ -1,8 +1,8 @@
 import type { Sport } from "./sport";
 import type { User } from "./user";
 import type { Booking } from "./booking";
-import type { VenueSlot } from "./venueSlot";
-import type { Review } from "./review";
+import type { VenueSlot } from "./VenueSlot";
+import type { Review } from "./Review";
 
 export interface Venue {
   id: number;

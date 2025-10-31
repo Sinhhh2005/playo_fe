@@ -16,20 +16,21 @@ import ownerRoutes from "./ownerRoutes";
 import CheckoutPage from "../components/mainUser/Page_book/checkout/CheckoutPage";
 import PaymentSuccess from "../components/mainUser/Page_book/bookCart/PaymentSuccess";
 import PaymentFailed from "../components/mainUser/Page_book/bookCart/PaymentFailed";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
 
 const router = createBrowserRouter([
 	{ path: "/", element: <Home /> },
 	{ path: "/login", element: <Login /> },
 	{ path: "/register", element: <Register /> },
+	{ path: "/forgot-password", element: <ForgotPassword /> },
+	{ path: "/reset-password", element: <ResetPassword /> },
 	{ path: "/play", element: <Play /> },
-	{ path: "/play/:id", element: <MatchDetail /> }, // ⚡ safe
-	// { path: "/train", element: <TrainPage /> },
-	// { path: "/train/:id", element: <TrainerDetailPage /> },
+	{ path: "/play/:id", element: <MatchDetail /> },
 	{ path: "/book", element: <Book /> },
 	{ path: "/experience-details/:nav/:id", element: <VenueDetail /> },
 	{ path: "/booking/:id", element: <BookCart /> },
 	{ path: "/checkout", element: <CheckoutPage /> },
-	// ✅ Thêm hai route mới cho Stripe redirect
 	{ path: "/payment-success", element: <PaymentSuccess /> },
 	{ path: "/payment-failed", element: <PaymentFailed /> },
 

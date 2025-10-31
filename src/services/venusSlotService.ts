@@ -1,5 +1,5 @@
 import axiosClient from "../utils/axiosClient";
-import type { VenueSlot } from "../types/venueSlot";
+import type { VenueSlot } from "../types/VenueSlot";
 
 const API_URL = "/slots";
 
