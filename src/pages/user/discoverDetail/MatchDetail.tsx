@@ -3,8 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { FaCalendarAlt, FaMapMarkerAlt, FaUser } from "react-icons/fa";
 import UserLayout from "../../../layouts/UserLayout";
 import * as SlotService from "../../../services/slotService";
-import type { VenueSlot } from "../../../types/venueSlot";
-import type { SlotUser } from "../../../types/slotUser";
+import type { VenueSlot } from "../../../types/venueslot";
+import type { SlotUser } from "../../../types/slotuser";
 
 export default function MatchDetail() {
 	const { id } = useParams<{ id: string }>();

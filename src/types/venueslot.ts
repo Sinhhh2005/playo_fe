@@ -1,7 +1,7 @@
 import type { Venue } from "./venue";
 import type { Sport } from "./sport";
 import type { Booking } from "./booking";
-import type { SlotUser } from "./slotUser";
+import type { SlotUser } from "./slotuser";
 import type { User } from "./user";
 
 
