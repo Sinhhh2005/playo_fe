@@ -1,11 +1,11 @@
 export * from "./user";
 export * from "./sport"
 export * from "./venue"
-export * from "./VenueSlot"
-export * from './SlotUser';
+export * from "./venueSlot"
+export * from './slotUser';
 export * from "./booking"
-export * from './Review';
-export * from './Payment';
+export * from './review';
+export * from './payment';
 export * from './cart';
 export * from './cartItem';
 

@@ -1,4 +1,4 @@
-import type { VenueSlot } from "./VenueSlot";
+import type { VenueSlot } from "./venueSlot";
 import type { User } from "./user";
 
 export interface SlotUser {

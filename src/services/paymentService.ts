@@ -1,5 +1,5 @@
 import axiosClient from "../utils/axiosClient";
-import type { Payment } from "../types/Payment";
+import type { Payment } from "../types/payment";
 
 const API_URL = "/payments";
 
