@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import type { Venue } from "../../types"; // ✅ import cả hai type
+import type { Venue } from "../../types/venue"; // ✅ import cả hai type
 
 interface BreadcrumbItem {
 	label: string;
