@@ -11,16 +11,13 @@ export interface ApiResponse<T> {
 }
 
 // 🧩 Lấy danh sách sân (phân trang)
-export const getAllFields = async (
-  page = 1,
-  limit = 5
-): Promise<ApiResponse<Venue[]>> => {
-  const response = await axiosClient.get<ApiResponse<Venue[]>>(
-    `/venues?page=${page}&limit=${limit}`
-  );
-
+export const getAllFields = async (page = 1, limit = 5, ownerUserId?: string) => {
+  let url = `/venues?page=${page}&limit=${limit}`;
+  if (ownerUserId) url += `&ownerUserId=${ownerUserId}`;
+  const response = await axiosClient.get(url);
   return response.data;
 };
+
 
 // 🧩 Xóa sân
 export const deleteField = async (id: string) => {

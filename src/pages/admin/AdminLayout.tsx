@@ -28,17 +28,29 @@ const AdminLayout = () => {
 					>
 						🏟️ Quản lý Sân bóng
 					</Link>
-						<Link
+					<Link
 						to="/admin/sportManagement"
 						className="block p-2 hover:bg-gray-700 rounded"
 					>
 						🏆 Quản lý thể thao
 					</Link>
 					<Link
-						to="/reports"
+						to="/admin/bookingManagement"
 						className="block p-2 hover:bg-gray-700 rounded"
 					>
-						📊 Xem báo cáo
+						🧾 Quản lý booking
+					</Link>
+					<Link
+						to="/admin/slotVenueManagement"
+						className="block p-2 hover:bg-gray-700 rounded"
+					>
+						🔍 Quản lý slot sân chờ
+					</Link>
+					<Link
+						to="/admin/paymentManagement"
+						className="block p-2 hover:bg-gray-700 rounded"
+					>
+						💰 Quản lý thanh toán
 					</Link>
 					<Link
 						to="/"
@@ -56,7 +68,7 @@ const AdminLayout = () => {
 					{/* Logo / Title */}
 					<div className="flex items-center gap-2 font-bold text-lg">
 						<span>Admin Dashboard</span>
-					</div>			
+					</div>
 
 					{/* User Info + Logout */}
 					<div className="flex items-center gap-4">

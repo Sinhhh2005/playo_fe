@@ -12,7 +12,6 @@ import VenueDetail from "../components/mainUser/Page_book/bookDetail/VenueDetail
 import BookCart from "../components/mainUser/Page_book/bookCart/BookCart";
 import PrivateRoute from "../components/PrivateRoute";
 import adminRoutes from "./adminRoutes";
-import ownerRoutes from "./ownerRoutes";
 import CheckoutPage from "../components/mainUser/Page_book/checkout/CheckoutPage";
 import PaymentSuccess from "../components/mainUser/Page_book/bookCart/PaymentSuccess";
 import PaymentFailed from "../components/mainUser/Page_book/bookCart/PaymentFailed";
@@ -42,7 +41,7 @@ const router = createBrowserRouter([
 		element: <PrivateRoute roles={["admin"]} />,
 		children: [adminRoutes],
 	},
-	ownerRoutes,
+
 	{
 		path: "*",
 		element: <div className="p-8 text-center">404 - Page Not Found</div>,

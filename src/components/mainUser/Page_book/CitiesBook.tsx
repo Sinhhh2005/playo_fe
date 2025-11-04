@@ -46,7 +46,7 @@ const SportsComplexes: React.FC = () => {
 				const res = await Services.getAllFields(1, 50); // ✅ lấy tối đa 50 sân
 
 				if (res.success && Array.isArray(res.data)) {
-					const mapped = res.data.map((v) => ({
+					const mapped = res.data.map((v: { id: number; name: string; district?: string }) => ({
 						id: v.id,
 						name: v.name,
 						city: v.district || "Unknown",

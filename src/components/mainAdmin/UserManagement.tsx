@@ -199,27 +199,29 @@ const UserManagement: React.FC = () => {
 					+ Thêm người dùng
 				</Button>
 			</div>
-			<TableContainer component={Paper} className="shadow-md rounded-lg">
-				<Table>
-					<TableHead className="bg-gray-100">
-						<TableRow>
-							<TableCell className="font-bold">Avatar</TableCell>
-							<TableCell className="font-bold">Tên</TableCell>
-							<TableCell className="font-bold">Email</TableCell>
-							<TableCell className="font-bold">Vai trò</TableCell>
-							<TableCell className="font-bold">
-								Hành động
-							</TableCell>
-						</TableRow>
-					</TableHead>
-				</Table>
-			</TableContainer>
 			<div className="flex-1 overflow-y-auto">
 				<TableContainer
 					component={Paper}
 					className="shadow-md rounded-lg"
 				>
 					<Table>
+						<TableHead className="bg-gray-100">
+							<TableRow>
+								<TableCell className="font-bold">
+									Avatar
+								</TableCell>
+								<TableCell className="font-bold">Tên</TableCell>
+								<TableCell className="font-bold">
+									Email
+								</TableCell>
+								<TableCell className="font-bold">
+									Vai trò
+								</TableCell>
+								<TableCell className="font-bold">
+									Hành động
+								</TableCell>
+							</TableRow>
+						</TableHead>
 						<TableBody>
 							{users.map((user) => (
 								<TableRow key={user.id} hover>

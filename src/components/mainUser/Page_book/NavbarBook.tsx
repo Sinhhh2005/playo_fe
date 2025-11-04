@@ -1,11 +1,6 @@
 // src/components/mainUser/Page_book/NavbarBook.tsx
 import { Link, useNavigate } from "react-router-dom";
-import {
-	FaRunning,
-	FaBaseballBall,
-	FaChalkboardTeacher,
-	FaUserCircle,
-} from "react-icons/fa";
+import { FaRunning, FaBaseballBall, FaUserCircle } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import * as Services from "../../../services/fieldService";
 import type { User } from "../../../types/user";
@@ -41,7 +36,9 @@ const NavbarBook = () => {
 		const fetchCities = async () => {
 			try {
 				const res = await Services.getAllFields();
-				const fieldList = Array.isArray(res.data) ? (res.data as Venue[]) : [];
+				const fieldList = Array.isArray(res.data)
+					? (res.data as Venue[])
+					: [];
 
 				const cities = fieldList
 					.map((item) => {
@@ -178,13 +175,6 @@ const NavbarBook = () => {
 						>
 							<FaBaseballBall />
 							<span>Book</span>
-						</Link>
-						<Link
-							to="/train"
-							className="flex items-center space-x-2 hover:text-green-600 transition"
-						>
-							<FaChalkboardTeacher />
-							<span>Train</span>
 						</Link>
 					</div>
 

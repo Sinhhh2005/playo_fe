@@ -20,6 +20,9 @@ export interface Booking {
   totalPrice: number;
   createdAt?: string;
   updatedAt?: string;
+  venueName: string;
+  venueLocation: string;
+  sportName: string;
 
   // Relations
   user?: User;

@@ -145,24 +145,20 @@ const SportManagement: React.FC = () => {
 					Thêm thể thao
 				</Button>
 			</div>
-			<TableContainer component={Paper}>
-				<Table>
-					<TableHead className="bg-gray-100">
-						<TableRow>
-							<TableCell>Tên thể thao</TableCell>
-							<TableCell>Mô tả</TableCell>
-							<TableCell>Ảnh minh họa</TableCell>
-							<TableCell>Biểu tượng</TableCell>
-							<TableCell align="center">Hành động</TableCell>
-						</TableRow>
-					</TableHead>
-				</Table>
-			</TableContainer>
 
 			{/* Bảng danh sách */}
 			<div className="flex-1 overflow-y-auto">
 				<TableContainer component={Paper}>
 					<Table>
+						<TableHead className="bg-gray-100">
+							<TableRow>
+								<TableCell>Tên thể thao</TableCell>
+								<TableCell>Mô tả</TableCell>
+								<TableCell>Ảnh minh họa</TableCell>
+								<TableCell>Biểu tượng</TableCell>
+								<TableCell align="center">Hành động</TableCell>
+							</TableRow>
+						</TableHead>
 						<TableBody>
 							{sports.length > 0 ? (
 								sports.map((sport) => (

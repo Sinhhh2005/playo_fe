@@ -1,10 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import {
-	FaRunning,
-	FaBaseballBall,
-	FaChalkboardTeacher,
-	FaUserCircle,
-} from "react-icons/fa";
+import { FaRunning, FaBaseballBall, FaUserCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";
 
 const Navbar: React.FC = () => {
@@ -110,14 +105,6 @@ const Navbar: React.FC = () => {
 						<FaBaseballBall />
 						<span>Book</span>
 					</Link>
-
-					<Link
-						to="/train"
-						className="flex items-center space-x-2 hover:text-green-600 transition"
-					>
-						<FaChalkboardTeacher />
-						<span>Train</span>
-					</Link>
 				</div>
 
 				{/* User Icon Right */}
@@ -159,6 +146,15 @@ const Navbar: React.FC = () => {
 											className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
 										>
 											Admin Dashboard
+										</Link>
+									)}
+									{role === "owner" && (
+										<Link
+											to="/owner"
+											onClick={() => setOpen(false)}
+											className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+										>
+											owner Dashboard
 										</Link>
 									)}
 

@@ -149,24 +149,21 @@ const FieldManagement: React.FC = () => {
 			<div className="flex justify-between items-center my-4">
 				<h2 className="text-xl font-semibold">Quản lý Sân</h2>
 			</div>
-			<TableContainer component={Paper} className="shadow-lg">
-				<Table>
-					<TableHead className="bg-gray-100">
-						<TableRow>
-							<TableCell>Tên sân</TableCell>
-							<TableCell>Địa chỉ</TableCell>
-							<TableCell>Thể thao</TableCell>
-							<TableCell>Chủ sân</TableCell>
-							<TableCell>Trạng thái</TableCell>
-							<TableCell align="center">Hành động</TableCell>
-						</TableRow>
-					</TableHead>
-				</Table>
-			</TableContainer>
+
 			{/* Bảng danh sách sân */}
 			<div className="flex-1 overflow-y-auto">
 				<TableContainer component={Paper} className="shadow-lg">
 					<Table>
+						<TableHead className="bg-gray-100">
+							<TableRow>
+								<TableCell>Tên sân</TableCell>
+								<TableCell>Địa chỉ</TableCell>
+								<TableCell>Thể thao</TableCell>
+								<TableCell>Chủ sân</TableCell>
+								<TableCell>Trạng thái</TableCell>
+								<TableCell align="center">Hành động</TableCell>
+							</TableRow>
+						</TableHead>
 						<TableBody>
 							{fields.map((f) => (
 								<TableRow key={f.id}>
