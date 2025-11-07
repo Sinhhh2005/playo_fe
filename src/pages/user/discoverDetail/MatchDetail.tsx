@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaCalendarAlt, FaMapMarkerAlt, FaUser } from "react-icons/fa";
+import socket from "../../../utils/socketClient";
 import UserLayout from "../../../layouts/UserLayout";
 import * as SlotService from "../../../services/slotService";
 import type { VenueSlot } from "../../../types/venueslot";
@@ -15,6 +16,7 @@ export default function MatchDetail() {
 	const [error, setError] = useState<string | null>(null);
 	const [actionLoading, setActionLoading] = useState(false);
 
+	// ✅ Fetch dữ liệu ban đầu
 	useEffect(() => {
 		if (!id) {
 			setError("Game ID không hợp lệ");
@@ -30,7 +32,7 @@ export default function MatchDetail() {
 				if (!found) throw new Error("Không tìm thấy game");
 				setGame(found);
 
-				// ✅ Similar games
+				// Similar games
 				const diffSports = allSlots.filter(
 					(s) =>
 						s.sportId !== found.sportId &&
@@ -45,7 +47,7 @@ export default function MatchDetail() {
 				).slice(0, 3);
 				setSimilarGames(uniqueSimilarGames);
 
-				// ✅ Nearby venues
+				// Nearby venues
 				const diffDistricts = allSlots.filter(
 					(s) =>
 						s.id !== found.id &&
@@ -70,6 +72,27 @@ export default function MatchDetail() {
 		};
 
 		fetchData();
+	}, [id]);
+
+	// ⚡️ Lắng nghe realtime từ server
+	useEffect(() => {
+		if (!id) return;
+
+		socket.on("connect", () => {
+			console.log("✅ Connected to Socket.IO:", socket.id);
+		});
+
+		socket.on("slotUpdated", (data: any) => {
+			console.log("📡 Slot updated:", data);
+
+			if (String(data.slotId) === id) {
+				setGame(data.updated);
+			}
+		});
+
+		return () => {
+			socket.disconnect();
+		};
 	}, [id]);
 
 	const getCurrentUserId = () => localStorage.getItem("userId");
@@ -110,6 +133,8 @@ export default function MatchDetail() {
 					name: uname,
 				});
 			}
+
+			// Sau khi join/leave xong, fetch lại state local (phòng khi socket trễ)
 			const refreshed = await SlotService.getSlotById(String(game.id));
 			setGame(refreshed);
 		} catch (err: any) {
